@@ -24,7 +24,6 @@ on:
       - '*.md'
       - 'changelog.d/**'
       - 'assets/**'
-      - 'openllm-contrib/clojure/**'
   pull_request:
     branches: [main]
     paths-ignore:
@@ -34,7 +33,6 @@ on:
       - '*.md'
       - 'changelog.d/**'
       - 'assets/**'
-      - 'openllm-contrib/clojure/**'
 env:
   LINES: 120
   COLUMNS: 120
@@ -54,7 +52,7 @@ jobs:
     outputs:
       message: ${{ steps.commit_message.outputs.message }}
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # ratchet:actions/checkout@v4.1.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # ratchet:actions/checkout@v4.1.1
         # Gets the correct commit message for pull request
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -76,7 +74,7 @@ jobs:
       matrix:
         directory: ['openllm-core', 'openllm-python', 'openllm-client']
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # ratchet:actions/checkout@v4.1.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # ratchet:actions/checkout@v4.1.1
         with:
           fetch-depth: 0
           ref: '${{ inputs.tags }}'
@@ -112,7 +110,7 @@ jobs:
         directory: ['openllm-core', 'openllm-python', 'openllm-client']
     needs: get_commit_message
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # ratchet:actions/checkout@v4.1.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # ratchet:actions/checkout@v4.1.1
         with:
           fetch-depth: 0
           ref: '${{ inputs.tags }}'
@@ -203,7 +201,7 @@ jobs:
       #     name: macos-universal2-mypyc-wheels
       #     path: dist
       - name: Publish nightly wheels to test.pypi.org
-        uses: pypa/gh-action-pypi-publish@b7f401de30cb6434a1e19f805ff006643653240e # ratchet:pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@2f6f737ca5f74c637829c0f5c3acd0e29ea5e8bf # ratchet:pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
   sucess-push: # https://github.com/marketplace/actions/alls-green#why

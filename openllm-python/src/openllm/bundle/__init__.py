@@ -1,33 +1,36 @@
-"""Build-related utilities. Some of these utilities are mainly used for 'openllm.build'.
-
-These utilities will stay internal, and its API can be changed or updated without backward-compatibility.
-"""
 from __future__ import annotations
-import os
-import typing as t
+import os, attr, functools
+from openllm_core._typing_compat import LiteralVersionStrategy
+from openllm_core.exceptions import OpenLLMException
+from openllm_core.utils.lazy import VersionInfo, LazyModule
 
-from openllm_core.utils import LazyModule
-
-_import_structure: dict[str, list[str]] = {
-    '_package': ['create_bento', 'build_editable', 'construct_python_options', 'construct_docker_options'],
-    'oci': ['CONTAINER_NAMES', 'get_base_container_tag', 'build_container', 'get_base_container_name', 'supported_registries', 'RefResolver']
-}
-
-if t.TYPE_CHECKING:
-  from . import _package as _package
-  from . import oci as oci
-  from ._package import build_editable as build_editable
-  from ._package import construct_docker_options as construct_docker_options
-  from ._package import construct_python_options as construct_python_options
-  from ._package import create_bento as create_bento
-  from .oci import CONTAINER_NAMES as CONTAINER_NAMES
-  from .oci import RefResolver as RefResolver
-  from .oci import build_container as build_container
-  from .oci import get_base_container_name as get_base_container_name
-  from .oci import get_base_container_tag as get_base_container_tag
-  from .oci import supported_registries as supported_registries
-
-__lazy = LazyModule(__name__, os.path.abspath('__file__'), _import_structure)
-__all__ = __lazy.__all__
-__dir__ = __lazy.__dir__
-__getattr__ = __lazy.__getattr__
+@attr.attrs(eq=False, order=False, slots=True, frozen=True)
+class RefResolver:
+  git_hash: str = attr.field()
+  version: VersionInfo = attr.field(converter=lambda s: VersionInfo.from_version_string(s))
+  strategy: LiteralVersionStrategy = attr.field()
+  @classmethod
+  @functools.lru_cache(maxsize=64)
+  def from_strategy(cls, strategy_or_version: LiteralVersionStrategy | None = None) -> RefResolver:
+    # using default strategy
+    if strategy_or_version is None or strategy_or_version == 'release':
+      try:
+        from ghapi.all import GhApi
+        ghapi = GhApi(owner='bentoml', repo='openllm', authenticate=False)
+        meta = ghapi.repos.get_latest_release()
+        git_hash = ghapi.git.get_ref(ref=f"tags/{meta['name']}")['object']['sha']
+      except Exception as err:
+        raise OpenLLMException('Failed to determine latest release version.') from err
+      return cls(git_hash, meta['name'].lstrip('v'), 'release')
+    elif strategy_or_version in ('latest', 'nightly'):  # latest is nightly
+      return cls('latest', '0.0.0', 'latest')
+    else:
+      raise ValueError(f'Unknown strategy: {strategy_or_version}')
+  @property
+  def tag(self) -> str: return 'latest' if self.strategy in {'latest', 'nightly'} else repr(self.version)
+__lazy = LazyModule(
+  __name__, os.path.abspath('__file__'), #
+  {'_package': ['create_bento', 'build_editable', 'construct_python_options', 'construct_docker_options']},
+  extra_objects={'RefResolver': RefResolver}
+)
+__all__, __dir__, __getattr__ = __lazy.__all__, __lazy.__dir__, __lazy.__getattr__

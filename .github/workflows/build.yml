@@ -7,19 +7,24 @@ on:
     tags:
       - '*'
     paths:
-      - '.github/workflows/build-embedding.yml'
       - 'openllm-python/src/openllm/**'
+      - 'openllm-python/src/openllm_cli/**'
       - 'openllm-core/src/openllm_core/**'
       - 'openllm-client/src/openllm_client/**'
   pull_request:
     branches:
       - 'main'
     paths:
-      - '.github/workflows/build-embedding.yml'
       - 'openllm-python/src/openllm/**'
+      - 'openllm-python/src/openllm_cli/**'
       - 'openllm-core/src/openllm_core/**'
       - 'openllm-client/src/openllm_client/**'
     types: [labeled, opened, synchronize, reopened]
+  workflow_call:
+    inputs:
+      tags:
+        required: true
+        type: string
 env:
   LINES: 120
   COLUMNS: 120
@@ -37,7 +42,7 @@ jobs:
     outputs:
       message: ${{ steps.commit_message.outputs.message }}
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # ratchet:actions/checkout@v4.1.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # ratchet:actions/checkout@v4.1.1
         # Gets the correct commit message for pull request
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -95,9 +100,10 @@ jobs:
       id-token: write
       security-events: write
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # ratchet:actions/checkout@v4.1.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # ratchet:actions/checkout@v4.1.1
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+          ref: '${{ inputs.tags }}'
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@102b1a064a9b145e56556e22b18b19c624538d94 # ratchet:rlespinasse/github-slug-action@v4.4.1
       - name: Set up QEMU
@@ -111,7 +117,7 @@ jobs:
             network=host
       - name: Install cosign
         if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b9192b8f19 # ratchet:sigstore/cosign-installer@v3.1.2
+        uses: sigstore/cosign-installer@1fc5bd396d372bee37d608f955b336615edf79c8 # ratchet:sigstore/cosign-installer@v3.2.0
         with:
           cosign-release: 'v2.1.1'
       - name: Login to GitHub Container Registry
@@ -121,34 +127,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to public ECR
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # ratchet:docker/login-action@v3.0.0
-        with:
-          registry: public.ecr.aws
-          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        env:
-          AWS_REGION: us-east-1
-      - name: Extract metadata tags and labels on PRs
-        if: github.event_name == 'pull_request'
-        id: meta-pr
-        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # ratchet:docker/metadata-action@v5.0.0
-        with:
-          images: |
-            public.ecr.aws/y5w8i4y6/bentoml/openllm
-          tags: |
-            type=raw,value=sha-${{ env.GITHUB_SHA_SHORT }}
-          labels: |
-            org.opencontainers.image.source="https://github.com/bentoml/OpenLLM"
       - name: Extract metadata tags and labels for main, release or tag
         if: github.event_name != 'pull_request'
         id: meta
-        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # ratchet:docker/metadata-action@v5.0.0
+        uses: docker/metadata-action@e6428a5c4e294a61438ed7f43155db912025b6b3 # ratchet:docker/metadata-action@v5.2.0
         with:
           flavor: |
             latest=auto
           images: |
-            public.ecr.aws/y5w8i4y6/bentoml/openllm
             ghcr.io/bentoml/openllm
           tags: |
             type=semver,pattern={{version}}
@@ -160,13 +146,13 @@ jobs:
             org.opencontainers.image.source="https://github.com/bentoml/OpenLLM"
       - name: Build and push Docker image
         id: build-and-push
-        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # ratchet:docker/build-push-action@v5.0.0
+        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # ratchet:docker/build-push-action@v5.1.0
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_PROD_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_PROD_SECRET_ACCESS_KEY }}
         with:
           context: .
-          file: openllm-python/src/openllm/bundle/oci/Dockerfile
+          file: Dockerfile
           push: true
           platforms: 'linux/amd64'
           build-args: |
@@ -187,7 +173,7 @@ jobs:
           COSIGN_EXPERIMENTAL: 'true'
         run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign --yes {}@${{ steps.build-and-push.outputs.digest }}
       - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
-        uses: aquasecurity/trivy-action@fbd16365eb88e12433951383f5e99bd901fc618f # ratchet:aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@2b6a709cf9c4025c5438138008beaddbb02086f0 # ratchet:aquasecurity/trivy-action@master
         if: ${{ github.event_name != 'pull_request' }}
         with:
           image-ref: 'ghcr.io/bentoml/openllm:sha-${{ env.GITHUB_SHA_SHORT }}'
@@ -196,7 +182,7 @@ jobs:
           github-pat: ${{ secrets.GITHUB_TOKEN }}
           scanners: 'vuln'
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@fbd16365eb88e12433951383f5e99bd901fc618f # ratchet:aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@2b6a709cf9c4025c5438138008beaddbb02086f0 # ratchet:aquasecurity/trivy-action@master
         if: ${{ github.event_name != 'pull_request' }}
         with:
           image-ref: 'ghcr.io/bentoml/openllm:sha-${{ env.GITHUB_SHA_SHORT }}'
@@ -205,7 +191,7 @@ jobs:
           severity: 'CRITICAL'
           scanners: 'vuln'
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@0116bc2df50751f9724a2e35ef1f24d22f90e4e1 # ratchet:github/codeql-action/upload-sarif@v2.22.3
+        uses: github/codeql-action/upload-sarif@407ffafae6a767df3e0230c3df91b6443ae8df75 # ratchet:github/codeql-action/upload-sarif@v2.22.8
         if: ${{ github.event_name != 'pull_request' }}
         with:
           sarif_file: 'trivy-results.sarif'

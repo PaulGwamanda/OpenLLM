@@ -30,7 +30,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # ratchet:actions/checkout@v4.1.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # ratchet:actions/checkout@v4.1.1
         with:
           fetch-depth: 0
           token: ${{ secrets.OPENLLM_PAT }}
@@ -56,7 +56,10 @@ jobs:
           GIT_AUTHOR_EMAIL: ${{ steps.import-gpg.outputs.email }}
           GIT_COMMITTER_NAME: ${{ steps.import-gpg.outputs.name }}
           GIT_COMMITTER_EMAIL: ${{ steps.import-gpg.outputs.email }}
-        run: ./.github/actions/release.sh --release ${{ inputs.release_type }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |-
+          pip install ghapi inflection tomlkit orjson
+          ./.github/actions/release.sh --release ${{ inputs.release_type }}
       - name: Set project version
         id: version
         run: |-
@@ -78,7 +81,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # ratchet:actions/checkout@v4.1.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # ratchet:actions/checkout@v4.1.1
         with:
           ref: '${{ needs.release.outputs.version }}'
           token: ${{ secrets.OPENLLM_PAT }}
@@ -111,7 +114,7 @@ jobs:
       - name: Smoke test compiled artefacts
         run: ls -R dist
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@b7f401de30cb6434a1e19f805ff006643653240e # ratchet:pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@2f6f737ca5f74c637829c0f5c3acd0e29ea5e8bf # ratchet:pypa/gh-action-pypi-publish@release/v1
         with:
           print-hash: true
   prepare-next-dev-cycle:
@@ -124,7 +127,7 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # ratchet:actions/checkout@v4.1.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # ratchet:actions/checkout@v4.1.1
         with:
           fetch-depth: 0
       - name: Setup python
@@ -169,10 +172,7 @@ jobs:
           pushd openllm-node &>/dev/null
           jq --arg release_version "${DEV_VERSION}" '.version = $release_version' < package.json > package.json.tmp && mv package.json.tmp package.json
           popd &>/dev/null
-          pushd openllm-contrib/clojure &>/dev/null
-          jq --arg release_version "${version}" '.version = $release_version' < package.json > package.json.tmp && mv package.json.tmp package.json
-          popd &>/dev/null
-          git add package.json openllm-node/package.json openllm-contrib/clojure/package.json && git commit -S -sm "infra: bump to dev version of ${DEV_VERSION} [generated] [skip ci]"
+          git add package.json openllm-node/package.json && git commit -S -sm "infra: bump to dev version of ${DEV_VERSION} [generated] [skip ci]"
           git push origin HEAD:main
   binary-distribution:
     if: github.repository_owner == 'bentoml'
@@ -199,7 +199,7 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # ratchet:actions/checkout@v4.1.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # ratchet:actions/checkout@v4.1.1
         with:
           fetch-depth: 0
       - uses: bentoml/setup-bentoml-action@862aa8fa0e0c3793fcca4bfe7a62717a497417e4 # ratchet:bentoml/setup-bentoml-action@v1

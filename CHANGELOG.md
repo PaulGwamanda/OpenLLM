@@ -18,6 +18,459 @@ This changelog is managed by towncrier and is compiled at release time.
 
 <!-- towncrier release notes start -->
 
+## [0.4.35](https://github.com/bentoml/openllm/tree/v0.4.35)
+No significant changes.
+
+
+## [0.4.34](https://github.com/bentoml/openllm/tree/v0.4.34)
+No significant changes.
+
+
+## [0.4.33](https://github.com/bentoml/openllm/tree/v0.4.33)
+No significant changes.
+
+
+## [0.4.32](https://github.com/bentoml/openllm/tree/v0.4.32)
+No significant changes.
+
+
+## [0.4.31](https://github.com/bentoml/openllm/tree/v0.4.31)
+No significant changes.
+
+
+## [0.4.30](https://github.com/bentoml/openllm/tree/v0.4.30)
+No significant changes.
+
+
+## [0.4.29](https://github.com/bentoml/openllm/tree/v0.4.29)
+No significant changes.
+
+
+## [0.4.28](https://github.com/bentoml/openllm/tree/v0.4.28)
+
+### Changes
+
+- Only baichuan2 and baichuan3 are supported. We dropped baichuan 1 support
+  [#728](https://github.com/bentoml/openllm/issues/728)
+
+## [0.4.27](https://github.com/bentoml/openllm/tree/v0.4.27)
+
+### Changes
+
+- We will deprecate support for PyTorch backend and will enforce all
+  built Bento to use vLLM backend going forward. This means that `openllm build`
+  with `--backend pt` will now be deprecated and move to `--backend vllm`.
+
+  We will focus more on contributing upstream to vLLM and will ensure that the core
+  value of OpenLLM is to provide a flexible and as streamlined experience to bring these
+  models to production with ease.
+
+  PyTorch backend will be removed from 0.5.0 releases onwards.
+
+  The docker images will now only be available on GHCR and not on ECR anymore as a measure
+  to reduce cost and maintenance one our side
+  [#730](https://github.com/bentoml/openllm/issues/730)
+
+## [0.4.26](https://github.com/bentoml/openllm/tree/v0.4.26)
+
+### Features
+
+- `/v1/chat/completions` now accepts two additional parameters
+
+  - `chat_templates`: this is a string of [Jinja templates](https://huggingface.co/docs/transformers/main/chat_templating#templates-for-chat-models)
+                       to use with this models. By default, it will just use the default models provided chat templates based on config.json.
+  - `add_generation_prompt`: See [here](https://huggingface.co/docs/transformers/main/chat_templating#how-do-i-use-chat-templates)
+  [#725](https://github.com/bentoml/openllm/issues/725)
+
+## [0.4.25](https://github.com/bentoml/openllm/tree/v0.4.25)
+No significant changes.
+
+
+## [0.4.24](https://github.com/bentoml/openllm/tree/v0.4.24)
+No significant changes.
+
+
+## [0.4.23](https://github.com/bentoml/openllm/tree/v0.4.23)
+No significant changes.
+
+
+## [0.4.22](https://github.com/bentoml/openllm/tree/v0.4.22)
+No significant changes.
+
+
+## [0.4.21](https://github.com/bentoml/openllm/tree/v0.4.21)
+No significant changes.
+
+
+## [0.4.20](https://github.com/bentoml/openllm/tree/v0.4.20)
+No significant changes.
+
+
+## [0.4.19](https://github.com/bentoml/openllm/tree/v0.4.19)
+No significant changes.
+
+
+## [0.4.18](https://github.com/bentoml/openllm/tree/v0.4.18)
+No significant changes.
+
+
+## [0.4.17](https://github.com/bentoml/openllm/tree/v0.4.17)
+No significant changes.
+
+
+## [0.4.16](https://github.com/bentoml/openllm/tree/v0.4.16)
+
+### Changes
+
+- Update vLLM to 0.2.2, bringing supports and a lot of improvement upstream
+  [#695](https://github.com/bentoml/openllm/issues/695)
+
+
+### Features
+
+- Added experimental CTranslate backend to run on CPU, that yields higher TPS comparing to PyTorch counterpart.
+
+  This has been tested on c5.4xlarge instances
+  [#698](https://github.com/bentoml/openllm/issues/698)
+
+## [0.4.15](https://github.com/bentoml/openllm/tree/v0.4.15)
+
+### Features
+
+- PyTorch runners now supports logprobs calculation for the `logits` output.
+
+  Update logits calculation to support encoder-decoder models (which fix T5 inference)
+  [#692](https://github.com/bentoml/openllm/issues/692)
+
+## [0.4.14](https://github.com/bentoml/openllm/tree/v0.4.14)
+No significant changes.
+
+
+## [0.4.13](https://github.com/bentoml/openllm/tree/v0.4.13)
+No significant changes.
+
+
+## [0.4.12](https://github.com/bentoml/openllm/tree/v0.4.12)
+No significant changes.
+
+
+## [0.4.11](https://github.com/bentoml/openllm/tree/v0.4.11)
+
+### Bug fix
+
+- Fixes a environment generation bug that caused CONFIG envvar to be invalid JSON
+  [#680](https://github.com/bentoml/openllm/issues/680)
+
+## [0.4.10](https://github.com/bentoml/openllm/tree/v0.4.10)
+
+### Changes
+
+- `openllm build` from 0.4.10 will start locking packages for hemerticity
+
+  We also remove some of the packages that is not required, since it should already be in the base image.
+
+  Improve general codegen for service_vars to static save all variables in `_service_vars.py` to save two access call in envvar.
+  The envvar for all variables are still there in the container for backwards compatibility.
+  [#669](https://github.com/bentoml/openllm/issues/669)
+
+
+### Features
+
+- Type hints for all exposed API are now provided through stubs. This means REPL
+  and static analysis tools like mypy can infer types from library instantly without
+  having to infer types from runtime function signatures.
+  [#663](https://github.com/bentoml/openllm/issues/663)
+- OpenLLM image sizes now has been compressed and reduced to around 6.75 GB uncompressed.
+  [#675](https://github.com/bentoml/openllm/issues/675)
+
+## [0.4.9](https://github.com/bentoml/openllm/tree/v0.4.9)
+No significant changes.
+
+
+## [0.4.8](https://github.com/bentoml/openllm/tree/v0.4.8)
+No significant changes.
+
+
+## [0.4.7](https://github.com/bentoml/openllm/tree/v0.4.7)
+No significant changes.
+
+
+## [0.4.6](https://github.com/bentoml/openllm/tree/v0.4.6)
+No significant changes.
+
+
+## [0.4.5](https://github.com/bentoml/openllm/tree/v0.4.5)
+No significant changes.
+
+
+## [0.4.4](https://github.com/bentoml/openllm/tree/v0.4.4)
+
+### Features
+
+- Certain warnings can now be disabled with `OPENLLM_DISABLE_WARNINGS=True` in the environment.
+
+  `openllm.LLM` now also brings `embedded` mode. By default this is True. if `embedded=True`, then
+  the model will be loaded eagerly. This should only be used during developmen
+
+  ```python
+
+  import openllm
+
+  llm = openllm.LLM('HuggingFaceH4/zephyr-7b-beta', backend='vllm', embedded=True)
+  ```
+
+  The default behaviour of loading the model first time when `llm.generate` or `llm.generate_iterator` is unchanged.
+  `embedded` option is mainly for backward compatibility and more explicit definition.
+  [#618](https://github.com/bentoml/openllm/issues/618)
+
+## [0.4.3](https://github.com/bentoml/openllm/tree/v0.4.3)
+
+### Features
+
+- OpenLLM server now provides a helpers endpoint to help easily create new prompt and other utilities in the future
+
+  `/v1/helpers/messages` will format a list of messages into the correct chat messages given the chat model
+  [#613](https://github.com/bentoml/openllm/issues/613)
+- client now have an additional helpers attribute class to work with helpers endpoint
+
+  ```python
+  client = openllm.HTTPClient()
+
+  prompt = client.helpers.messages(
+    add_generation_prompt=False,
+    messages=[
+      {'role': 'system', 'content': 'You are acting as Ernest Hemmingway.'},
+      {'role': 'user', 'content': 'Hi there!'},
+      {'role': 'assistant', 'content': 'Yes?'},
+    ],
+  )
+  ```
+
+  Async variant
+
+  ```python
+  client = openllm.AsyncHTTPClient()
+
+  prompt = await client.helpers.messages(
+    add_generation_prompt=False,
+    messages=[
+      {'role': 'system', 'content': 'You are acting as Ernest Hemmingway.'},
+      {'role': 'user', 'content': 'Hi there!'},
+      {'role': 'assistant', 'content': 'Yes?'},
+    ],
+  )
+  ```
+  [#615](https://github.com/bentoml/openllm/issues/615)
+
+## [0.4.2](https://github.com/bentoml/openllm/tree/v0.4.2)
+
+### Changes
+
+- Update client implementation and support Authentication through `OPENLLM_AUTH_TOKEN`
+  [#605](https://github.com/bentoml/openllm/issues/605)
+
+
+### Refactor
+
+- ## Auto backend detection
+
+  By default, OpenLLM will use vLLM (if available) to run the server. We recommend users to always explicitly set backend to `--backend vllm` for the best performance.
+
+  if vLLM is not available, OpenLLM will fall back to PyTorch backend. Note that the PyTorch backend won't be as performant
+
+  ## Revamped CLI interface
+
+  This is a part of the recent restructure of `openllm.LLM`
+
+  For all CLI, there is no need to pass in the architecture anymore. One can directly pass in the model and save a few characters
+
+  Start:
+
+  ```bash
+
+  openllm start meta-llama/Llama-2-13b-chat-hf --device 0
+
+  ```
+
+  Build:
+
+  ```bash
+
+  openllm build meta-llama/Llama-2-13b-chat-hf --serialisation safetensors
+
+  ```
+
+  Import:
+
+  ```bash
+
+  openllm build mistralai/Mistral-7B-v0.1 --serialisation legacy
+
+  ```
+
+  All CLI outputs will now dump JSON objects to stdout. This will ensure easier programmatic access to the CLI.
+  This means `--output/-o` is removed from all CLI commands, as all of them will output JSON.
+
+  Passing in `model_name` will now be deprecated and will be removed from the future. If you try `openllm start opt`, you will see the following
+
+  ```bash
+  $ openllm start opt
+
+  Passing 'openllm start opt' is deprecated and will be remove in a future version. Use 'openllm start facebook/opt-1.3b' instead.
+  ```
+
+  Example outputs of `openllm models`:
+
+  ```bash
+  $ openllm models
+
+  {
+    "chatglm": {
+      "architecture": "ChatGLMModel",
+      "example_id": "thudm/chatglm2-6b",
+      "supported_backends": [
+        "pt"
+      ],
+      "installation": "pip install \"openllm[chatglm]\"",
+      "items": []
+    },
+    "dolly_v2": {
+      "architecture": "GPTNeoXForCausalLM",
+      "example_id": "databricks/dolly-v2-3b",
+      "supported_backends": [
+        "pt",
+        "vllm"
+      ],
+      "installation": "pip install openllm",
+      "items": []
+    },
+    "falcon": {
+      "architecture": "FalconForCausalLM",
+      "example_id": "tiiuae/falcon-40b-instruct",
+      "supported_backends": [
+        "pt",
+        "vllm"
+      ],
+      "installation": "pip install \"openllm[falcon]\"",
+      "items": []
+    },
+    "flan_t5": {
+      "architecture": "T5ForConditionalGeneration",
+      "example_id": "google/flan-t5-small",
+      "supported_backends": [
+        "pt"
+      ],
+      "installation": "pip install openllm",
+      "items": []
+    },
+    "gpt_neox": {
+      "architecture": "GPTNeoXForCausalLM",
+      "example_id": "eleutherai/gpt-neox-20b",
+      "supported_backends": [
+        "pt",
+        "vllm"
+      ],
+      "installation": "pip install openllm",
+      "items": []
+    },
+    "llama": {
+      "architecture": "LlamaForCausalLM",
+      "example_id": "NousResearch/llama-2-70b-hf",
+      "supported_backends": [
+        "pt",
+        "vllm"
+      ],
+      "installation": "pip install \"openllm[llama]\"",
+      "items": []
+    },
+    "mpt": {
+      "architecture": "MPTForCausalLM",
+      "example_id": "mosaicml/mpt-7b-chat",
+      "supported_backends": [
+        "pt",
+        "vllm"
+      ],
+      "installation": "pip install \"openllm[mpt]\"",
+      "items": []
+    },
+    "opt": {
+      "architecture": "OPTForCausalLM",
+      "example_id": "facebook/opt-2.7b",
+      "supported_backends": [
+        "pt",
+        "vllm"
+      ],
+      "installation": "pip install \"openllm[opt]\"",
+      "items": []
+    },
+    "stablelm": {
+      "architecture": "GPTNeoXForCausalLM",
+      "example_id": "stabilityai/stablelm-base-alpha-3b",
+      "supported_backends": [
+        "pt",
+        "vllm"
+      ],
+      "installation": "pip install openllm",
+      "items": []
+    },
+    "starcoder": {
+      "architecture": "GPTBigCodeForCausalLM",
+      "example_id": "bigcode/starcoder",
+      "supported_backends": [
+        "pt",
+        "vllm"
+      ],
+      "installation": "pip install \"openllm[starcoder]\"",
+      "items": []
+    },
+    "mistral": {
+      "architecture": "MistralForCausalLM",
+      "example_id": "amazon/MistralLite",
+      "supported_backends": [
+        "pt",
+        "vllm"
+      ],
+      "installation": "pip install openllm",
+      "items": []
+    },
+    "baichuan": {
+      "architecture": "BaiChuanForCausalLM",
+      "example_id": "fireballoon/baichuan-vicuna-chinese-7b",
+      "supported_backends": [
+        "pt",
+        "vllm"
+      ],
+      "installation": "pip install \"openllm[baichuan]\"",
+      "items": []
+    }
+  }
+  ```
+  [#592](https://github.com/bentoml/openllm/issues/592)
+
+## [0.4.1](https://github.com/bentoml/openllm/tree/v0.4.1)
+No significant changes.
+
+
+## [0.4.0](https://github.com/bentoml/openllm/tree/v0.4.0)
+No significant changes.
+
+
+## [0.3.14](https://github.com/bentoml/openllm/tree/v0.3.14)
+No significant changes.
+
+
+## [0.3.13](https://github.com/bentoml/openllm/tree/v0.3.13)
+No significant changes.
+
+
+## [0.3.12](https://github.com/bentoml/openllm/tree/v0.3.12)
+No significant changes.
+
+
+## [0.3.10](https://github.com/bentoml/openllm/tree/v0.3.10)
+No significant changes.
+
+
 ## [0.3.9](https://github.com/bentoml/openllm/tree/v0.3.9)
 No significant changes.
 
@@ -208,7 +661,7 @@ No significant changes.
 
 - OpenLLM now include a community-maintained ClojureScript UI, Thanks @GutZuFusss
 
-  See [this README.md](/openllm-contrib/clojure/README.md) for more information
+  See [this README.md](/external/clojure/README.md) for more information
 
   OpenLLM will also include a `--cors` to enable start with cors enabled.
   [#89](https://github.com/bentoml/openllm/issues/89)

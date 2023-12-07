@@ -28,6 +28,9 @@ Before you can start developing, you'll need to set up your environment:
 > Note that `hatch run setup` will symlink the python version from `.python-version-default` to `.python-version` in the project root.
 > Therefore any tools that understand `.python-version` will use the correct Python version.
 
+> [!NOTE]
+> When in doubt, set `DEBUG=5` to see all generation debug logs and outputs
+
 1. Ensure you have [Git](https://git-scm.com/), and
    [Python3.8+](https://www.python.org/downloads/) installed.
 2. Fork the OpenLLM repository from GitHub.
@@ -199,11 +202,14 @@ After you change or update any CI related under `.github`, run `bash tools/lock-
 
 See this [docs](/.github/INFRA.md) for more information on OpenLLM's CI/CD workflow.
 
-## UI
+## Typing
+For all internal functions, it is recommended to provide type hint. For all public function definitions, it is recommended to create a stubs file `.pyi` to separate supported external API to increase code visibility. See [openllm-client's `__init__.pyi`](/openllm-client/src/openllm_client/__init__.pyi) for example.
 
-See [ClojureScript UI's README.md](/openllm-contrib/clojure/README.md) for more information.
+If an internal helpers or any functions, utilities that is prefixed with `_`, then it is recommended to provide inline annotations. See [STYLE.md](./STYLE.md) to learn more about style and typing philosophy.
 
-See [Documentation's README.md](/docs/README.md) for more information on running locally.
+If you want to update any mypy configuration, please update the [`./tools/update-mypy.py`](./tools/update-mypy.py)
+
+If you need to update pyright configuration, please update the [`pyrightconfig.json`](./pyrightconfig.json)
 
 ## Install from git archive install
 
